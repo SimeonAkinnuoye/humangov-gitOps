@@ -116,10 +116,23 @@ resource "aws_ecr_repository" "humangov_app_repo" {
   }
 }
 
+module "cicd" {
+  source = "./modules/cicd"
 
- module "argocd" {
+  region       = "us-east-1"
+  ecr_repo_url = aws_ecr_repository.humangov_app_repo.repository_url
+
+  # REPLACE WITH YOUR DETAILS
+  codestar_connection_arn = "arn:aws:codeconnections:us-east-1:211125586061:connection/87aab261-3f86-4b0d-937d-85240f12d358"
+  github_repo_id          = "SimeonAkinnuoye/humangov-gitOps"
+}
+
+
+
+
+module "argocd" {
   source = "./modules/argocd"
-  
+
   eks_cluster_name = module.eks.cluster_name
 
   depends_on = [module.eks]

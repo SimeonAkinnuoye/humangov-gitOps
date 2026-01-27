@@ -11,44 +11,44 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: humangov-python-app-california
+  name: humangov-python-app
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: humangov-python-app-california
+      app: humangov-python-app
   template:
     metadata:
       labels:
-        app: humangov-python-app-california
+        app: humangov-python-app
     spec:
       serviceAccountName: humangov-pod-execution-role
       containers:
-      - name: humangov-python-app-california 
+      - name: humangov-python-app
         image: IMAGE_PLACEHOLDER
         ports:
         - containerPort: 8000
         env:
         - name: AWS_BUCKET
-          value: "humangov-california-s3-ijsw"  
+          value: 
         - name: AWS_DYNAMODB_TABLE
-          value: "humangov-california-dynamodb"  
+          value:  
         - name: AWS_REGION
           value: us-east-1
         - name: US_STATE
-          value: california
+          value: 
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: humangov-python-app-california-service
+  name: humangov-python-app-service
   namespace: default
 spec:
   type: ClusterIP
   selector:
-    app: humangov-python-app-california
+    app: humangov-python-app
   ports:
   - protocol: TCP
     port: 8000
@@ -58,17 +58,17 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: humangov-python-nginx-california
+  name: humangov-nginx
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: humangov-python-nginx-california
+      app: humangov-nginx
   template:  
     metadata:
       labels:
-        app: humangov-python-nginx-california
+        app: humangov-nginx
     spec:
       containers:
       - name: nginx
@@ -83,18 +83,18 @@ spec:
       volumes:
       - name: nginx-config
         configMap:
-          name: humangov-python-app-california-nginx-config
+          name: humangov-nginx-config
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: humangov-python-nginx-california-service
+  name: humangov-nginx-service
   namespace: default
 spec: 
   type: ClusterIP
   selector:
-    app: humangov-python-nginx-california
+    app: humangov-nginx
   ports:
   - protocol: TCP
     port: 80
@@ -104,7 +104,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: humangov-python-app-california-nginx-config
+  name: humangov-nginx-config
   namespace: default
 data:
   nginx.conf: |
@@ -114,7 +114,7 @@ data:
     
     http {
       upstream backend {
-        server humangov-python-app-california-service:8000;
+        server humangov-python-app-service:8000;
       }
       
       server {
