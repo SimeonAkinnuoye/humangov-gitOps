@@ -2,52 +2,47 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      python: 3.9
     commands:
-      - echo "Installing kubectl..."
-      - curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.29.0/2024-01-04/bin/linux/amd64/kubectl
-      - chmod +x ./kubectl
-      - mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
-      
+      # Install Kustomize
+      - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+      - mv kustomize /usr/local/bin/
+  
   pre_build:
     commands:
-      # --- CRITICAL FIX: Move into the application directory ---
-      - cd human-gov-application/src
-      
-      - echo "Logging in to Amazon ECR..."
+      # Login to ECR
+      - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URL
       
+      # Define Tags
       - REPOSITORY_URI=$ECR_REPO_URL
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
 
   build:
     commands:
-      - echo "Build started on `date`"
-      - echo "Building the Docker image..."
-      # Now this works because we are in the src folder
-      - docker build -t $REPOSITORY_URI:latest .
-      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      - echo Building Docker image...
+      - cd human-gov-application/src
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - cd ../.. # Return to root
 
   post_build:
     commands:
-      - echo "Build completed on `date`"
-      - echo "Pushing the Docker image..."
-      - docker push $REPOSITORY_URI:latest
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Updating Image Tag in GitOps config...
       
-      - echo "Updating Kubeconfig..."
-      # We need to go back to root or ensure config works, but usually this is fine. 
-      # Accessing env vars works anywhere.
-      - aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME
+      # 1. Retrieve GitHub Token from Secrets Manager
+      - GITHUB_TOKEN=$(aws secretsmanager get-secret-value --secret-id humangov-gitOps/github-token --query SecretString --output text)
       
-      - echo "Updating YAML files with new Image Tag..."
-      - sed -i "s|IMAGE_PLACEHOLDER|$REPOSITORY_URI:$IMAGE_TAG|g" humangov-california.yaml
-      - sed -i "s|IMAGE_PLACEHOLDER|$REPOSITORY_URI:$IMAGE_TAG|g" humangov-florida.yaml
-      - sed -i "s|IMAGE_PLACEHOLDER|$REPOSITORY_URI:$IMAGE_TAG|g" humangov-texas.yaml
+      # 2. Configure Git
+      - git config --global user.email "codebuild@humangov.com"
+      - git config --global user.name "AWS CodeBuild"
+      - git remote set-url origin https://$GITHUB_TOKEN@github.com/SimeonAkinnuoye/humangov-gitops.git
       
-      - echo "Deploying to Kubernetes..."
-      - kubectl apply -f humangov-california.yaml
-      - kubectl apply -f humangov-florida.yaml
-      - kubectl apply -f humangov-texas.yaml
+      # 3. Update the DEV environment manifest
+      - cd k8s/overlays/dev
+      - kustomize edit set image humangov-app=$REPOSITORY_URI:$IMAGE_TAG
+      
+      # 4. Push changes back to GitHub
+      - git add kustomization.yaml
+      - git commit -m "CI: Update Dev image tag to $IMAGE_TAG"
+      - git push origin HEAD:main
