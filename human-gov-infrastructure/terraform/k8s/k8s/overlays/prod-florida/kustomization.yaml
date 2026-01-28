@@ -10,7 +10,7 @@ commonLabels:
 
 images:
   - name: IMAGE_PLACEHOLDER
-    newName: 123456789.dkr.ecr.us-east-1.amazonaws.com/humangov-app
+    newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
     newTag: v1.0.0  # Stable Tag
 
 patches:
@@ -21,7 +21,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/env/0/value
-        value: "humangov-florida-s3-REAL-ID" 
+        value: "humangov-florida-s3-dikj" 
       - op: replace
         path: /spec/template/spec/containers/0/env/1/value
         value: "humangov-florida-dynamodb"

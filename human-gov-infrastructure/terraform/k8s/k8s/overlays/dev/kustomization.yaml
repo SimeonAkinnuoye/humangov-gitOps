@@ -1,30 +1,40 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
 resources:
   - ../../base
+
 namespace: humangov-dev
 namePrefix: dev-
 commonLabels:
   environment: dev
 
-# CodeBuild will update this tag automatically
 images:
   - name: IMAGE_PLACEHOLDER
-    newName: 123456789.dkr.ecr.us-east-1.amazonaws.com/humangov-app
+    newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
     newTag: latest
 
 patches:
-  # inject testing values (or reuse california resources for testing)
+  # PATCH 1: Target the Deployment (Fix Env Vars)
   - target:
       kind: Deployment
       name: humangov-python-app
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/env/0/value
-        value: "humangov-california-s3-test" 
+        value: "humangov-california-s3-y35c" 
       - op: replace
         path: /spec/template/spec/containers/0/env/1/value
-        value: "humangov-california-dynamo-test"
+        value: "humangov-california-dynamodb"
       - op: replace
         path: /spec/template/spec/containers/0/env/3/value
         value: "california"
+
+  # PATCH 2: Target the Ingress (Fix Hostname)
+  - target:
+      kind: Ingress
+      name: humangov-ingress
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: "dev.humangovv.click"
