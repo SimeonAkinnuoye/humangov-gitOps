@@ -43,7 +43,7 @@ resource "aws_iam_role_policy" "codebuild_policy" {
       {
         Effect = "Allow"
         Action = ["secretsmanager:GetSecretValue"]
-        Resource = "arn:aws:secretsmanager:*:*:secret:humangov/github-token-*" 
+        Resource = "arn:aws:secretsmanager:*:*:secret:humangov-gitOps/github-token-*" 
       },
       # 4. S3 Access (The Fix for your Error)
       {

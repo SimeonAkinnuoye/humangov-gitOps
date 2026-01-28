@@ -27,7 +27,7 @@ phases:
   post_build:
     commands:
       - echo Updating Image Tag in GitOps config...
-      - GITHUB_TOKEN=$(aws secretsmanager get-secret-value --secret-id humangov/github-token --query SecretString --output text)
+      - GITHUB_TOKEN=$(aws secretsmanager get-secret-value --secret-id humangov-gitOps/github-token --query SecretString --output text)
       - git config --global user.email "codebuild@humangov.com"
       - git config --global user.name "AWS CodeBuild"
       - git remote set-url origin https://$GITHUB_TOKEN@github.com/SimeonAkinnuoye/humangov-gitops.git
