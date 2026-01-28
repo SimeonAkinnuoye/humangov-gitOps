@@ -3,17 +3,13 @@ version: 0.2
 phases:
   install:
     commands:
-      # Install Kustomize
       - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
       - mv kustomize /usr/local/bin/
   
   pre_build:
     commands:
-      # Login to ECR
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URL
-      
-      # Define Variables
       - REPOSITORY_URI=$ECR_REPO_URL
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
@@ -22,27 +18,21 @@ phases:
     commands:
       - echo Building Docker image...
       - cd human-gov-application/src
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - cd ../..
 
   post_build:
     commands:
       - echo Updating Image Tag in GitOps config...
-      
-      # 1. Retrieve GitHub Token
       - GITHUB_TOKEN=$(aws secretsmanager get-secret-value --secret-id humangov/github-token --query SecretString --output text)
-      
-      # 2. Configure Git
       - git config --global user.email "codebuild@humangov.com"
       - git config --global user.name "AWS CodeBuild"
       - git remote set-url origin https://$GITHUB_TOKEN@github.com/SimeonAkinnuoye/humangov-gitops.git
-      
-      # 3. Update the DEV environment manifest
       - cd k8s/overlays/dev
       - kustomize edit set image humangov-app=$REPOSITORY_URI:$IMAGE_TAG
-      
-      # 4. Push changes back to GitHub
       - git add kustomization.yaml
-      - git commit -m "CI: Update Dev image tag to $IMAGE_TAG"
+      - git commit -m "CI Update Dev image tag to $IMAGE_TAG"
       - git push origin HEAD:main
