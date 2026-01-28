@@ -1,46 +1,25 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: humangov-python-app-ingress
+  name: humangov-ingress
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/group.name: frontend
+    # Replace this with your REAL ACM Certificate ARN
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:211125586061:certificate/3088f6ba-e15d-4b8f-8d53-95ff0fe7b276
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
-  labels:
-    app: humangov-python-app-ingress
 spec:
   ingressClassName: alb
   rules:
-    - host: california.humangovv.click
+    - host: HOST_NAME_PLACEHOLDER
       http:
         paths:
         - path: /
           pathType: Prefix
           backend:
             service:
-              name: humangov-python-nginx-california-service
-              port:
-                number: 80
-    - host: florida.humangovv.click
-      http:
-        paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: humangov-python-nginx-florida-service
-              port:
-                number: 80
-    - host: texas.humangovv.click
-      http:
-        paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: humangov-python-nginx-texas-service
+              name: humangov-nginx-service
               port:
                 number: 80
