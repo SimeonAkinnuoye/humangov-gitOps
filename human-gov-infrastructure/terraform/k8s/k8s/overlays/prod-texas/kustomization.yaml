@@ -21,7 +21,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/env/0/value
-        value: "humangov-texas-s3-asv1" 
+        value: "humangov-texas-s3-iz00" 
       - op: replace
         path: /spec/template/spec/containers/0/env/1/value
         value: "humangov-texas-dynamodb"

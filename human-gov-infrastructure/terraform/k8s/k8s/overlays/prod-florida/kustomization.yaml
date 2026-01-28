@@ -21,7 +21,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/env/0/value
-        value: "humangov-florida-s3-dikj" 
+        value: "humangov-florida-s3-pblc" 
       - op: replace
         path: /spec/template/spec/containers/0/env/1/value
         value: "humangov-florida-dynamodb"
