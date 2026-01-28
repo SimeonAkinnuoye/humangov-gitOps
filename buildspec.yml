@@ -13,7 +13,7 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URL
       
-      # Define Tags
+      # Define Variables
       - REPOSITORY_URI=$ECR_REPO_URL
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
@@ -24,14 +24,14 @@ phases:
       - cd human-gov-application/src
       - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - cd ../.. # Return to root
+      - cd ../..
 
   post_build:
     commands:
       - echo Updating Image Tag in GitOps config...
       
-      # 1. Retrieve GitHub Token from Secrets Manager
-      - GITHUB_TOKEN=$(aws secretsmanager get-secret-value --secret-id humangov-gitOps/github-token --query SecretString --output text)
+      # 1. Retrieve GitHub Token
+      - GITHUB_TOKEN=$(aws secretsmanager get-secret-value --secret-id humangov/github-token --query SecretString --output text)
       
       # 2. Configure Git
       - git config --global user.email "codebuild@humangov.com"

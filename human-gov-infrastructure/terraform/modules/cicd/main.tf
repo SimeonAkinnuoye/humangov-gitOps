@@ -7,17 +7,24 @@ resource "aws_iam_role" "codebuild_role" {
   })
 }
 
-# Policies: Logs, ECR, and SECRETS MANAGER
+# 2. Permissions (Logs, ECR, Secrets Manager, AND S3)
 resource "aws_iam_role_policy" "codebuild_policy" {
   role = aws_iam_role.codebuild_role.name
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      # 1. Logging Access
       {
         Effect = "Allow"
-        Action = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
         Resource = "*"
       },
+      # 2. ECR Access (Push/Pull)
       {
         Effect = "Allow"
         Action = [
@@ -32,11 +39,24 @@ resource "aws_iam_role_policy" "codebuild_policy" {
         ]
         Resource = "*"
       },
-      # --- NEW: Allow reading the GitHub Token ---
+      # 3. Secrets Manager Access (For GitHub Token)
       {
         Effect = "Allow"
         Action = ["secretsmanager:GetSecretValue"]
-        Resource = "arn:aws:secretsmanager:us-east-1:*:secret:humangov-gitOps/github-token-*" 
+        Resource = "arn:aws:secretsmanager:*:*:secret:humangov/github-token-*" 
+      },
+      # 4. S3 Access (The Fix for your Error)
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectVersion",
+          "s3:GetBucketVersioning"
+        ]
+        Resource = [
+          aws_s3_bucket.codepipeline_bucket.arn,
+          "${aws_s3_bucket.codepipeline_bucket.arn}/*"
+        ]
       }
     ]
   })
