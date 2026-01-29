@@ -11,9 +11,9 @@ commonLabels:
 
 images:
   - name: IMAGE_PLACEHOLDER
-    # Your Real ECR URL
+    # Replace with your real ECR URL
     newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
-    # Your Real Image Tag
+    # Replace with your real tag
     newTag: "2b0b638"
 
 patches:
@@ -41,7 +41,7 @@ patches:
         path: /spec/rules/0/host
         value: "dev.humangovv.click"
 
-  
+  # PATCH 3: Fix Nginx Config (Aligned correctly now)
   - target:
       kind: ConfigMap
       name: humangov-nginx-config
@@ -56,7 +56,7 @@ patches:
             server {
               listen 80;
               location / {
-                # NOTICE THE 'dev-' PREFIX HERE:
+                # This points to the DEV service name
                 proxy_pass http://dev-humangov-python-app-service:8000;
                 proxy_set_header Host $host;
                 proxy_set_header X-Real-IP $remote_addr;
