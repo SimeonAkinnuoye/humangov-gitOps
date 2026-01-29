@@ -25,7 +25,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/replicas
-        value: 3  # High Availability for Prod
+        value: 1  # High Availability for Prod
       - op: replace
         path: /spec/template/spec/containers/0/env/0/value
         # ⚠️ CHECK TERRAFORM OUTPUT FOR REAL CALIFORNIA BUCKET NAME
