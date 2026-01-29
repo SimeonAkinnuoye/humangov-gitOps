@@ -12,7 +12,7 @@ commonLabels:
 images:
   - name: IMAGE_PLACEHOLDER
     newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
-    newTag: latest
+    newTag: "2b0b638"
 
 patches:
   # PATCH 1: Target the Deployment (Fix Env Vars)
@@ -22,7 +22,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/env/0/value
-        value: "humangov-california-s3-medb" 
+        value: "humangov-california-s3-13th" 
       - op: replace
         path: /spec/template/spec/containers/0/env/1/value
         value: "humangov-california-dynamodb"
