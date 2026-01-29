@@ -1,7 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
 resources:
   - ../../base
+
 namespace: humangov-prod
 namePrefix: prod-california-
 commonLabels:
@@ -10,17 +12,23 @@ commonLabels:
 
 images:
   - name: IMAGE_PLACEHOLDER
+    # ⚠️ REPLACE WITH YOUR REAL ECR URL
     newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
-    newTag: v1.0.0  # Stable Tag
+    # In Prod, we usually PIN a specific version (Stable) instead of "latest"
+    newTag: "2b0b638" 
 
 patches:
-  # Inject REAL California values from Terraform Output
+  # PATCH 1: Deployment (Replicas & Env Vars)
   - target:
       kind: Deployment
       name: humangov-python-app
     patch: |-
       - op: replace
+        path: /spec/replicas
+        value: 3  # High Availability for Prod
+      - op: replace
         path: /spec/template/spec/containers/0/env/0/value
+        # ⚠️ CHECK TERRAFORM OUTPUT FOR REAL CALIFORNIA BUCKET NAME
         value: "humangov-california-s3-13th" 
       - op: replace
         path: /spec/template/spec/containers/0/env/1/value
@@ -28,3 +36,38 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/env/3/value
         value: "california"
+
+  # PATCH 2: Ingress (Real Domain Name)
+  - target:
+      kind: Ingress
+      name: humangov-ingress
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: "california.humangovv.click"
+
+  # PATCH 3: Nginx Config (Service Discovery Fix)
+  # This is crucial so Nginx finds the Python app using the "prod-california-" prefix
+  - target:
+      kind: ConfigMap
+      name: humangov-nginx-config
+    patch: |-
+      - op: replace
+        path: /data/nginx.conf
+        value: |
+          events {
+            worker_connections 1024;
+          }
+          http {
+            server {
+              listen 80;
+              location / {
+                # Notice the prefix match: prod-california-
+                proxy_pass http://prod-california-humangov-python-app-service:8000;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+              }
+            }
+          }
