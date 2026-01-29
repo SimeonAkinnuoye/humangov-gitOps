@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../../base
+- ../../base
 
 namespace: humangov-dev
 namePrefix: dev-
@@ -10,12 +10,21 @@ commonLabels:
   environment: dev
 
 images:
+<<<<<<< HEAD
   - name: IMAGE_PLACEHOLDER
     newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
     newTag: "2b0b638"
+=======
+- name: IMAGE_PLACEHOLDER
+  newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
+  newTag: latest
+- name: humangov-app
+  newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
+  newTag: 2b0b638
+>>>>>>> 8fe9c14c85a27c4b00d259383d1455919e536289
 
-patches:
   # PATCH 1: Target the Deployment (Fix Env Vars)
+<<<<<<< HEAD
   - target:
       kind: Deployment
       name: humangov-python-app
@@ -29,12 +38,22 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/env/3/value
         value: "california"
+=======
+>>>>>>> 8fe9c14c85a27c4b00d259383d1455919e536289
 
   # PATCH 2: Target the Ingress (Fix Hostname)
-  - target:
-      kind: Ingress
-      name: humangov-ingress
-    patch: |-
-      - op: replace
-        path: /spec/rules/0/host
-        value: "dev.humangovv.click"
+patches:
+- patch: "- op: replace\n  path: /spec/template/spec/containers/0/env/0/value\n  value:
+    \"humangov-california-s3-medb\" \n- op: replace\n  path: /spec/template/spec/containers/0/env/1/value\n
+    \ value: \"humangov-california-dynamodb\"\n- op: replace\n  path: /spec/template/spec/containers/0/env/3/value\n
+    \ value: \"california\""
+  target:
+    kind: Deployment
+    name: humangov-python-app
+- patch: |-
+    - op: replace
+      path: /spec/rules/0/host
+      value: "dev.humangovv.click"
+  target:
+    kind: Ingress
+    name: humangov-ingress
