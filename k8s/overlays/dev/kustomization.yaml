@@ -14,7 +14,7 @@ images:
     # ⚠️ REPLACE with your real ECR URL
     newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
     # ⚠️ REPLACE with your real Tag (or let CI update it)
-    newTag: "2b0b638"
+    newTag: "a8141fb"
 
 patches:
   # Patch 1: Deployment Env Vars

@@ -15,7 +15,7 @@ images:
     # ⚠️ REPLACE WITH YOUR REAL ECR URL
     newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
     # In Prod, we usually PIN a specific version (Stable) instead of "latest"
-    newTag: "2b0b638" 
+    newTag: "a8141fb" 
 
 patches:
   # PATCH 1: Deployment (Replicas & Env Vars)
