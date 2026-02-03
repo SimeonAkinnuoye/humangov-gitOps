@@ -2,22 +2,25 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../../base
+- ../../base
 
 namespace: humangov-dev
 namePrefix: dev-
 commonLabels:
   environment: dev
 
-images:
-  - name: IMAGE_PLACEHOLDER
     # Replace with your real ECR URL
-    newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
     # Replace with your real tag
-    newTag: "2b0b638"
+images:
+- name: IMAGE_PLACEHOLDER
+  newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
+  newTag: 2b0b638
+- name: humangov-app
+  newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
+  newTag: a8141fb
 
-patches:
   # PATCH 1: Deployment Env Vars
+<<<<<<< HEAD
   - target:
       kind: Deployment
       name: humangov-python-app
@@ -31,37 +34,49 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/env/3/value
         value: "california"
+=======
+>>>>>>> c10bb339b7154371c0b00558f289366687c695df
 
   # PATCH 2: Ingress Hostname
-  - target:
-      kind: Ingress
-      name: humangov-ingress
-    patch: |-
-      - op: replace
-        path: /spec/rules/0/host
-        value: "dev.humangovv.click"
 
   # PATCH 3: Fix Nginx Config (Aligned correctly now)
-  - target:
-      kind: ConfigMap
-      name: humangov-nginx-config
-    patch: |-
-      - op: replace
-        path: /data/nginx.conf
-        value: |
-          events {
-            worker_connections 1024;
-          }
-          http {
-            server {
-              listen 80;
-              location / {
                 # This points to the DEV service name
-                proxy_pass http://dev-humangov-python-app-service:8000;
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
-              }
+              # This points to the DEV service name
+patches:
+- patch: "- op: replace\n  path: /spec/template/spec/containers/0/env/0/value\n  value:
+    \"humangov-california-s3-13th\" \n- op: replace\n  path: /spec/template/spec/containers/0/env/1/value\n
+    \ value: \"humangov-california-dynamodb\"\n- op: replace\n  path: /spec/template/spec/containers/0/env/3/value\n
+    \ value: \"california\""
+  target:
+    kind: Deployment
+    name: humangov-python-app
+- patch: |-
+    - op: replace
+      path: /spec/rules/0/host
+      value: "dev.humangovv.click"
+  target:
+    kind: Ingress
+    name: humangov-ingress
+- patch: |-
+    - op: replace
+      path: /data/nginx.conf
+      value: |
+        events {
+          worker_connections 1024;
+        }
+        http {
+          server {
+            listen 80;
+            location / {
+              # This points to the DEV service name
+              proxy_pass http://dev-humangov-python-app-service:8000;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
             }
           }
+        }
+  target:
+    kind: ConfigMap
+    name: humangov-nginx-config
