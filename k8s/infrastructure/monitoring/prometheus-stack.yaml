@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd  # The App resource lives in argocd namespace
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 66.x.x  # Pinning major version is safe
+    helm:
+      values: |
+        grafana:
+          adminPassword: "simeon" 
+          service:
+            type: ClusterIP
+        prometheus:
+          prometheusSpec:
+            # This setting is crucial for KEDA later!
+            serviceMonitorSelectorNilUsesHelmValues: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring # We put the actual tools in their own room
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true # Auto-create the 'monitoring' namespace

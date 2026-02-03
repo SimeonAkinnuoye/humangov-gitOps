@@ -36,10 +36,10 @@ module "eks" {
  
   # Node Groups (The "t3.medium" workers)
   eks_managed_node_groups = {
-    standard_workers = {           # Matches your --nodegroup-name
+    standard_workers = {      # Matches your --nodegroup-name
       min_size     = 1
       max_size     = 2
-      desired_size = 1             # Matches your --nodes 1
+      desired_size = 2             # Matches your --nodes 1
 
       instance_types = ["t3.medium"] # Matches your --node-type
       capacity_type  = "ON_DEMAND"
