@@ -17,7 +17,7 @@ images:
   newTag: 2b0b638
 - name: humangov-app
   newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
-  newTag: 7750ab3
+  newTag: a8141fb
 
   # PATCH 1: Deployment Env Vars
 
@@ -25,6 +25,7 @@ images:
 
   # PATCH 3: Fix Nginx Config (Aligned correctly now)
                 # This points to the DEV service name
+              # This points to the DEV service name
 patches:
 - patch: "- op: replace\n  path: /spec/template/spec/containers/0/env/0/value\n  value:
     \"humangov-california-s3-13th\" \n- op: replace\n  path: /spec/template/spec/containers/0/env/1/value\n
