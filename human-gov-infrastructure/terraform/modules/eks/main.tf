@@ -101,7 +101,11 @@ module "irsa_humangov_app" {
   oidc_providers = {
     main = {
       provider_arn = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["default:humangov-pod-execution-role"]
+      namespace_service_accounts = [
+        "default:humangov-pod-execution-role",
+        "humangov-dev:humangov-pod-execution-role",
+        "humangov-prod:humangov-pod-execution-role"
+        ]
     }
   }
 
