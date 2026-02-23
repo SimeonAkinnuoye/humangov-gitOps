@@ -15,7 +15,24 @@ images:
     # ⚠️ REPLACE WITH YOUR REAL ECR URL
     newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
     # In Prod, we usually PIN a specific version (Stable) instead of "latest"
-    newTag: "a8141fb" 
+    newTag: "apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+namespace: humangov-prod
+namePrefix: prod-florida-
+commonLabels:
+  environment: prod
+  state: florida
+
+images:
+  - name: IMAGE_PLACEHOLDER
+    # ⚠️ REPLACE WITH YOUR REAL ECR URL
+    newName: 211125586061.dkr.ecr.us-east-1.amazonaws.com/humangov-app
+    # In Prod, we usually PIN a specific version (Stable) instead of "latest"
+    newTag: "bedebde" 
 
 patches:
   # PATCH 1: Deployment (Replicas & Env Vars)
@@ -28,14 +45,14 @@ patches:
         value: 1  # High Availability for Prod
       - op: replace
         path: /spec/template/spec/containers/0/env/0/value
-        # ⚠️ CHECK TERRAFORM OUTPUT FOR REAL CALIFORNIA BUCKET NAME
-        value: "humangov-california-s3-1zta" 
+        # ⚠️ CHECK TERRAFORM OUTPUT FOR REAL florida BUCKET NAME
+        value: "humangov-florida-s3-1ot0" 
       - op: replace
         path: /spec/template/spec/containers/0/env/1/value
-        value: "humangov-california-dynamodb"
+        value: "humangov-florida-dynamodb"
       - op: replace
         path: /spec/template/spec/containers/0/env/3/value
-        value: "california"
+        value: "florida"
 
   # PATCH 2: Ingress (Real Domain Name)
   - target:
@@ -44,10 +61,10 @@ patches:
     patch: |-
       - op: replace
         path: /spec/rules/0/host
-        value: "california.humangovv.click"
+        value: "florida.humangovv.click"
 
   # PATCH 3: Nginx Config (Service Discovery Fix)
-  # This is crucial so Nginx finds the Python app using the "prod-california-" prefix
+  # This is crucial so Nginx finds the Python app using the "prod-florida-" prefix
   - target:
       kind: ConfigMap
       name: humangov-nginx-config
@@ -62,12 +79,13 @@ patches:
             server {
               listen 80;
               location / {
-                # Notice the prefix match: prod-california-
-                proxy_pass http://prod-california-humangov-python-app-service:8000;
+                # Notice the prefix match: prod-florida-
+                proxy_pass http://prod-florida-humangov-python-app-service:8000;
                 proxy_set_header Host $host;
                 proxy_set_header X-Real-IP $remote_addr;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
                 proxy_set_header X-Forwarded-Proto $scheme;
               }
             }
-          }
+          }" 
+
