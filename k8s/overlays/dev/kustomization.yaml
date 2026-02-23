@@ -24,7 +24,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/env/0/value
-        value: "humangov-california-s3-9e1r"
+        value: "humangov-california-s3-1zta"
       - op: replace
         path: /spec/template/spec/containers/0/env/1/value
         value: "humangov-california-dynamodb"

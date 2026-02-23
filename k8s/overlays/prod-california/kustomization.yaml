@@ -29,7 +29,7 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/env/0/value
         # ⚠️ CHECK TERRAFORM OUTPUT FOR REAL CALIFORNIA BUCKET NAME
-        value: "humangov-california-s3-9e1r" 
+        value: "humangov-california-s3-1zta" 
       - op: replace
         path: /spec/template/spec/containers/0/env/1/value
         value: "humangov-california-dynamodb"

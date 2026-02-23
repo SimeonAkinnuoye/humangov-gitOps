@@ -29,7 +29,7 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/env/0/value
         # ⚠️ CHECK TERRAFORM OUTPUT FOR REAL florida BUCKET NAME
-        value: "humangov-florida-s3-p4yy" 
+        value: "humangov-florida-s3-1ot0" 
       - op: replace
         path: /spec/template/spec/containers/0/env/1/value
         value: "humangov-florida-dynamodb"
