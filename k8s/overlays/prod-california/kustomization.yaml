@@ -22,7 +22,7 @@ resources:
   - ../../base
 
 namespace: humangov-prod
-namePrefix: prod-florida-
+namePrefix: prod-humangov-pod-execution-role
 commonLabels:
   environment: prod
   state: florida

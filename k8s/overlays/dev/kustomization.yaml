@@ -5,7 +5,7 @@ resources:
   - ../../base
 
 namespace: humangov-dev
-namePrefix: dev-
+namePrefix: dev-humangov-pod-execution-role
 commonLabels:
   environment: dev
   state: california
